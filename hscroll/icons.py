@@ -11,6 +11,8 @@ from PyQt6.QtCore import QBuffer, QIODevice, QPointF, QRectF, Qt
 from PyQt6.QtGui import (QBrush, QColor, QIcon, QIconEngine, QImage, QLinearGradient, QPainter, QPainterPath, QPen,
                          QPixmap)
 
+from .accent import windows_accent
+
 _SIZES = (16, 20, 24, 32, 40, 48, 64, 96, 128, 256)
 _ICO_SIZES = (16, 20, 24, 32, 40, 48, 64, 256)
 _STROKE = 1.6  # in the 24x24 design grid
@@ -115,15 +117,13 @@ def light_taskbar() -> bool:
         return False
 
 
-def tray_icon(state: str, accent: QColor) -> QIcon:
-    """state: "on", "latched" (accent-filled) or "off" (dimmed). `accent` is the base accent color."""
+def tray_icon(state: str) -> QIcon:
+    """state: "on", "latched" (accent-filled) or "off" (dimmed)."""
     light = light_taskbar()
     fg = QColor(0, 0, 0) if light else QColor(255, 255, 255)
     if state == "off":
         fg.setAlphaF(0.45)
-    if not light:  # brighter accent shade on a dark taskbar, as Windows does
-        h, s, _, _ = accent.getHsvF()
-        accent = QColor.fromHsvF(max(h, 0), s * 0.84, 1.0)
+    accent = windows_accent(dark=not light)  # the shade Windows uses on this taskbar
 
     def paint(p, size):
         rect = QRectF(0, 0, size, size)

@@ -5,6 +5,7 @@ from ctypes import wintypes
 user32 = ctypes.WinDLL("user32", use_last_error=True)
 kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 shell32 = ctypes.WinDLL("shell32", use_last_error=True)
+advapi32 = ctypes.WinDLL("advapi32", use_last_error=True)
 
 LRESULT = wintypes.LPARAM
 ULONG_PTR = ctypes.c_size_t
@@ -27,6 +28,9 @@ MOUSEEVENTF_WHEEL = 0x0800
 MOUSEEVENTF_HWHEEL = 0x1000
 
 ASFW_ANY = 0xFFFFFFFF
+REG_NOTIFY_CHANGE_LAST_SET = 0x4
+INFINITE = 0xFFFFFFFF
+WAIT_OBJECT_0 = 0
 MONITOR_DEFAULTTONEAREST = 2
 GWL_STYLE = -16
 WS_CAPTION = 0x00C00000
@@ -118,6 +122,14 @@ GetCurrentThreadId = _fn(kernel32, "GetCurrentThreadId", wintypes.DWORD)
 GetModuleHandleW = _fn(kernel32, "GetModuleHandleW", wintypes.HMODULE, wintypes.LPCWSTR)
 SetCurrentProcessExplicitAppUserModelID = _fn(shell32, "SetCurrentProcessExplicitAppUserModelID",
                                               ctypes.c_long, wintypes.LPCWSTR)
+RegNotifyChangeKeyValue = _fn(advapi32, "RegNotifyChangeKeyValue", wintypes.LONG,
+                              wintypes.HKEY, wintypes.BOOL, wintypes.DWORD, wintypes.HANDLE, wintypes.BOOL)
+CreateEventW = _fn(kernel32, "CreateEventW", wintypes.HANDLE,
+                   ctypes.c_void_p, wintypes.BOOL, wintypes.BOOL, wintypes.LPCWSTR)
+SetEvent = _fn(kernel32, "SetEvent", wintypes.BOOL, wintypes.HANDLE)
+CloseHandle = _fn(kernel32, "CloseHandle", wintypes.BOOL, wintypes.HANDLE)
+WaitForMultipleObjects = _fn(kernel32, "WaitForMultipleObjects", wintypes.DWORD,
+                             wintypes.DWORD, ctypes.POINTER(wintypes.HANDLE), wintypes.BOOL, wintypes.DWORD)
 
 
 def _mouse_input(flags: int, data: int = 0) -> INPUT:

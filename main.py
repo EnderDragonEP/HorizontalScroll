@@ -7,13 +7,14 @@ import logging
 import sys
 from logging.handlers import RotatingFileHandler
 
-from PyQt6.QtCore import QObject
+from PyQt6.QtCore import QObject, QTimer
+from PyQt6.QtGui import QColor
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon
-from qfluentwidgets import SystemThemeListener, Theme, qconfig, setTheme, setThemeColor
-from qframelesswindow.utils import getSystemAccentColor
+from qfluentwidgets import SystemThemeListener, Theme, ThemeColor, isDarkTheme, qconfig, setTheme, setThemeColor
 
 from hscroll import APP_ID, APP_NAME, DATA_DIR, LOG_FILE, config, winapi
+from hscroll.accent import AccentWatcher, windows_accent
 from hscroll.config import cfg
 from hscroll.hook import MouseHook
 from hscroll.osd import Osd
@@ -51,14 +52,42 @@ def signal_running_instance(show: bool) -> bool:
     return True
 
 
+_library_shade = ThemeColor.color
+_dark_brightness = 1.0
+
+
+def _windows_shade(self: ThemeColor) -> QColor:
+    """qfluentwidgets forces full brightness on accent shades in dark mode;
+    scale them to the brightness of Windows' own dark-mode accent instead."""
+    color = _library_shade(self)
+    if isDarkTheme():
+        h, s, v, a = color.getHsvF()
+        color = QColor.fromHsvF(h, s, v * _dark_brightness, a)
+    return color
+
+
+ThemeColor.color = _windows_shade
+
+
+def sync_accent():
+    """Use the accent shade Windows itself uses for the current light/dark mode."""
+    global _dark_brightness
+    dark = isDarkTheme()
+    color = windows_accent(dark)
+    if dark:
+        # The library also scales saturation by 0.84 in dark mode; compensate for it.
+        h, s, v, _ = color.getHsvF()
+        _dark_brightness = v
+        color = QColor.fromHsvF(max(h, 0.0), min(s / 0.84, 1.0), v)
+    setThemeColor(color)
+
+
 class App(QObject):
     def __init__(self, qapp: QApplication, show_window: bool):
         super().__init__()
         config.load()
         setTheme(Theme.AUTO)
-        accent = getSystemAccentColor()
-        if accent.isValid():
-            setThemeColor(accent)
+        sync_accent()
         config.refresh_autostart()
 
         # Build all UI before the hook starts so heavy GUI work never stalls mouse input.
@@ -67,6 +96,9 @@ class App(QObject):
         self.osd = Osd()
         self.hook = MouseHook(self)
         self.themeListener = SystemThemeListener(self)
+        self.accentWatcher = AccentWatcher(self)
+        # Windows writes several accent values in a row; react once they settle.
+        self.accentTimer = QTimer(self, singleShot=True, interval=300, timeout=self._onAccentChanged)
         self.server = QLocalServer(self)
         self.server.listen(SERVER_NAME)
 
@@ -76,13 +108,15 @@ class App(QObject):
         self.tray.exitRequested.connect(qapp.quit)
         self.hook.latchedChanged.connect(self._onLatched)
         self.hook.failed.connect(self._onHookFailed)
-        self.themeListener.systemThemeChanged.connect(self.tray.refresh)
+        self.themeListener.systemThemeChanged.connect(self._onAccentChanged)  # dark/light use different shades
+        self.accentWatcher.changed.connect(self.accentTimer.start)
         for item in (cfg.enabled, cfg.trigger, cfg.toggleMode, cfg.disableInFullscreen, cfg.reverse, cfg.speed):
             item.valueChanged.connect(self._apply)
         qapp.aboutToQuit.connect(self._shutdown)
 
         self.tray.show()
         self.themeListener.start()
+        self.accentWatcher.start()
         self._apply()
         if show_window:
             self.window.present()
@@ -92,6 +126,10 @@ class App(QObject):
             self.hook.start(config.to_settings())  # updates the settings if already running
         else:
             self.hook.stop()
+
+    def _onAccentChanged(self):
+        sync_accent()
+        self.tray.refresh()
 
     def _onLatched(self, on: bool):
         self.tray.setLatched(on)
@@ -115,6 +153,7 @@ class App(QObject):
 
     def _shutdown(self):
         self.hook.stop()
+        self.accentWatcher.stop()
         self.themeListener.terminate()
         self.tray.hide()
 

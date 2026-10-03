@@ -41,7 +41,7 @@ class Tray(QSystemTrayIcon):
             state, tip = "latched", "Horizontal scrolling on"
         else:
             state, tip = "on", "On"
-        self.setIcon(icons.tray_icon(state, qconfig.get(qconfig.themeColor)))
+        self.setIcon(icons.tray_icon(state))
         self.setToolTip(f"{APP_NAME} – {tip}")
 
     def _checkable(self, text, item) -> Action:
