@@ -17,6 +17,14 @@ The settings window follows the Fluent Design System: Mica background, light/dar
 - 🎨 **Feels like Native App** – Fluent Design with Mica, light/dark mode and your accent color, updated live.
 - 🔔 **Update check** – See if a new version is out, right from the About section.
 
+## Limitations
+
+- It doesn't work over windows of apps running as administrator unless Horizontal Scroll also runs as administrator. Windows blocks this.
+- Apps without horizontal-scroll support won't scroll sideways.
+- If mouse software (for example Logitech Options+) remaps Back/Forward to keystrokes, the app never sees the buttons.
+- In hold mode, Back/Forward fires on button release, a moment later than usual.
+- Single-file PyInstaller exes are sometimes flagged by antivirus heuristics. If that happens, build a one-folder version instead by moving `a.binaries`/`a.datas` into a `COLLECT` step in the spec.
+
 ## Run
 
 - **Exe:** download `HorizontalScroll.exe` from the [Releases](../../releases) page, or build it yourself (see below). It's a single file, and Python isn't needed. Start it with `--tray` to start hidden.
@@ -45,14 +53,6 @@ The script creates `.venv`, installs the requirements plus PyInstaller, and writ
 ```powershell
 .\.venv\Scripts\python -m unittest discover -s tests -v
 ```
-
-## Limitations
-
-- It doesn't work over windows of apps running as administrator unless Horizontal Scroll also runs as administrator. Windows blocks this.
-- Apps without horizontal-scroll support won't scroll sideways.
-- If mouse software (for example Logitech Options+) remaps Back/Forward to keystrokes, the app never sees the buttons.
-- In hold mode, Back/Forward fires on button release, a moment later than usual.
-- Single-file PyInstaller exes are sometimes flagged by antivirus heuristics. If that happens, build a one-folder version instead by moving `a.binaries`/`a.datas` into a `COLLECT` step in the spec.
 
 ## Layout
 
