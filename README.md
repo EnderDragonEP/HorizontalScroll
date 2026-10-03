@@ -67,22 +67,14 @@ hscroll/osd.py       toggle-mode on/off pill
 hscroll/icons.py     icons drawn in code + .ico writer for the build
 ```
 
+## Disclaimer
+
+This software is provided "as is", without warranty of any kind. Use it at your own risk; the author is not responsible for any damage or data loss resulting from its use.
+
+Horizontal Scroll started as a personal project. It is not affiliated with or endorsed by Microsoft.
+
+Claude Code was used in the development of this software.
+
 ## License
 
-Copyright (C) 2026 Ender Yang.
-
-Horizontal Scroll is free software, released under the [GNU General Public License v3.0](LICENSE.md).
-You may use, change and share it, even sell it, as long as you share your version's source code under the same license.
-It comes with no warranty.
-
-It is built with these open-source libraries:
-
-| Library | License |
-| --- | --- |
-| [PyQt6](https://www.riverbankcomputing.com/software/pyqt/) | GPL-3.0 |
-| [PyQt6-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) | GPL-3.0 |
-| [PyQt6-Frameless-Window](https://github.com/zhiyiYo/PyQt-Frameless-Window) | GPL-3.0 |
-| [darkdetect](https://github.com/albertosottile/darkdetect) | BSD-3-Clause |
-| [pywin32](https://github.com/mhammond/pywin32) | PSF |
-
-The exe also contains Python (PSF License) and the Qt libraries that ship with PyQt6 (LGPL-3.0).
+[GPL-3.0](LICENSE) © 2026 Ender Yang. Dependency information is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
