@@ -5,6 +5,7 @@ from pathlib import Path
 APP_NAME = "Horizontal Scroll"
 APP_ID = "HorizontalScroll"
 __version__ = "1.0.0"
+__author__ = "Ender Yang"
 
 DATA_DIR = Path(os.environ.get("APPDATA", Path.home())) / APP_ID
 CONFIG_FILE = DATA_DIR / "config.json"

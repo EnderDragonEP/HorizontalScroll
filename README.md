@@ -19,6 +19,7 @@ Closing the window keeps the app running in the notification area. Right-click t
 
 - **Exe:** download `HorizontalScroll.exe` from the [Releases](../../releases) page, or build it yourself (see below). It's a single file, and Python isn't needed. Start it with `--tray` to start hidden.
 - **From source:**
+
   ```powershell
   python -m venv .venv
   .\.venv\Scripts\python -m pip install -r requirements.txt
@@ -51,12 +52,13 @@ The script creates `.venv`, installs the requirements plus PyInstaller, and writ
 
 ## Layout
 
-```
+```text
 main.py              entry point: single instance, wires config, hook and UI
 hscroll/engine.py    scroll/toggle/full-screen decisions (pure, unit-tested)
 hscroll/hook.py      low-level mouse hook thread + SendInput injector thread
 hscroll/winapi.py    ctypes bindings, input injection, full-screen detection
 hscroll/config.py    settings (qfluentwidgets QConfig) and the Run-key autostart
+hscroll/accent.py    Windows accent shades + watcher for accent changes
 hscroll/window.py    Fluent settings window
 hscroll/tray.py      tray icon and menu
 hscroll/osd.py       toggle-mode on/off pill
@@ -64,6 +66,8 @@ hscroll/icons.py     icons drawn in code + .ico writer for the build
 ```
 
 ## License
+
+Copyright (C) 2026 Ender Yang.
 
 Horizontal Scroll is free software, released under the [GNU General Public License v3.0](LICENSE.md).
 You may use, change and share it, even sell it, as long as you share your version's source code under the same license.

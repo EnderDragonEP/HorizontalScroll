@@ -1,5 +1,34 @@
 # PyInstaller spec: one small windowed HorizontalScroll.exe.  Build with .\build.ps1
-from pathlib import PurePath
+import re
+from pathlib import Path, PurePath
+
+from PyInstaller.utils.win32.versioninfo import (FixedFileInfo, StringFileInfo, StringStruct, StringTable,
+                                                 VarFileInfo, VarStruct, VSVersionInfo)
+
+# Version and author live in one place: hscroll/__init__.py
+_INIT = (Path(SPECPATH) / "hscroll" / "__init__.py").read_text()
+VERSION = re.search(r'__version__ = "([^"]+)"', _INIT).group(1)
+AUTHOR = re.search(r'__author__ = "([^"]+)"', _INIT).group(1)
+VERSION_TUPLE = tuple(int(n) for n in (VERSION.split(".") + ["0"] * 4)[:4])
+
+# Shown in the exe's Properties > Details tab (FileDescription is also the name Task Manager shows).
+VERSION_INFO = VSVersionInfo(
+    ffi=FixedFileInfo(filevers=VERSION_TUPLE, prodvers=VERSION_TUPLE),
+    kids=[
+        StringFileInfo([StringTable("040904B0", [
+            StringStruct("FileDescription", "Horizontal Scroll"),
+            StringStruct("ProductName", "Horizontal Scroll"),
+            StringStruct("FileVersion", VERSION),
+            StringStruct("ProductVersion", VERSION),
+            StringStruct("InternalName", "HorizontalScroll"),
+            StringStruct("OriginalFilename", "HorizontalScroll.exe"),
+            StringStruct("CompanyName", AUTHOR),  # shown as "Publisher" in Task Manager's Startup apps
+            StringStruct("LegalCopyright", f"Copyright (C) 2026 {AUTHOR}. Licensed under GPL-3.0."),
+            StringStruct("Comments", "Hold Mouse Back or Forward and roll the wheel to scroll sideways."),
+        ])]),
+        VarFileInfo([VarStruct("Translation", [1033, 1200])]),  # US English, Unicode
+    ],
+)
 
 EXCLUDES = [
     # large packages that might be installed but are never used
@@ -42,5 +71,6 @@ exe = EXE(
     name="HorizontalScroll",
     console=False,
     icon="build/app.ico",
+    version=VERSION_INFO,
     upx=False,
 )
