@@ -26,6 +26,8 @@ Closing the window keeps the app running in the notification area. Right-click t
   .\.venv\Scripts\pythonw main.py
   ```
 
+  After that, you can also just double-click `run.pyw` to test your changes without building the exe.
+
 Settings are saved to `%APPDATA%\HorizontalScroll\config.json`, and errors are logged to `error.log` in the same folder.
 
 ## Build the exe
