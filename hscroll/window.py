@@ -1,12 +1,12 @@
 """Settings window, built with PyQt6-Fluent-Widgets (Fluent Design, Mica on Windows 11)."""
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QGuiApplication
+from PyQt6.QtCore import Qt, QUrl, pyqtSignal
+from PyQt6.QtGui import QColor, QDesktopServices, QFont, QGuiApplication
 from PyQt6.QtWidgets import QVBoxLayout, QWidget
-from qfluentwidgets import (BodyLabel, ComboBoxSettingCard, ExpandLayout, FluentIcon as FIF, FluentWidget, InfoBar,
-                            InfoBarPosition, RangeSettingCard, ScrollArea, SettingCardGroup, SwitchSettingCard,
-                            TitleLabel, setFont)
+from qfluentwidgets import (BodyLabel, ComboBoxSettingCard, ExpandLayout, FluentIcon as FIF, FluentWidget,
+                            HyperlinkLabel, InfoBar, InfoBarPosition, PrimaryPushSettingCard, RangeSettingCard,
+                            ScrollArea, SettingCardGroup, SwitchSettingCard, TitleLabel, setFont)
 
-from . import APP_NAME, config, icons
+from . import APP_NAME, REPO_URL, __author__, __version__, config, icons
 from .config import cfg
 
 TRIGGER_TEXTS = {"either": "Back or Forward", "back": "Back", "forward": "Forward"}
@@ -40,6 +40,19 @@ class SpeedCard(RangeSettingCard):
     def _show(self, value):
         self.valueLabel.setText(f"{value / 10:.1f}×")
         self.valueLabel.adjustSize()
+
+
+class AboutCard(PrimaryPushSettingCard):
+    """App name, version and copyright with a "View source" link, plus the update button."""
+
+    def __init__(self, parent=None):
+        super().__init__("Check for updates", icons.app_icon(), APP_NAME,
+                         f"Version {__version__} · © 2026 {__author__} · GPL-3.0", parent)
+        self.sourceLink = HyperlinkLabel("View source", self)
+        setFont(self.sourceLink, 12)
+        self.vBoxLayout.addSpacing(4)
+        self.vBoxLayout.addWidget(self.sourceLink, 0, Qt.AlignmentFlag.AlignLeft)
+        self.setFixedHeight(92)
 
 
 class SettingsPage(ScrollArea):
@@ -82,9 +95,16 @@ class SettingsPage(ScrollArea):
             parent=self.general)
         self.general.addSettingCards([self.fullscreenCard, self.startupCard])
 
+        self.about = Group("About", self.view)
+        self.aboutCard = AboutCard(self.about)
+        self.about.addSettingCard(self.aboutCard)
+
+        bottomPadding = QWidget(self.view)  # ExpandLayout ignores the bottom margin
+        bottomPadding.setFixedHeight(8)
+
         self.expand.setSpacing(28)
-        self.expand.setContentsMargins(36, 0, 36, 36)
-        for widget in (self.enableCard, self.activation, self.scrolling, self.general):
+        self.expand.setContentsMargins(36, 0, 36, 0)
+        for widget in (self.enableCard, self.activation, self.scrolling, self.general, self.about, bottomPadding):
             self.expand.addWidget(widget)
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -126,6 +146,8 @@ class SettingsWindow(FluentWidget):
 
         self.page.startupCard.setChecked(config.is_autostart())
         self.page.startupCard.checkedChanged.connect(self._setAutostart)
+        self.page.aboutCard.clicked.connect(self._checkForUpdates)
+        self.page.aboutCard.sourceLink.clicked.connect(self._viewSource)
         cfg.trigger.valueChanged.connect(self._updateHint)
         cfg.toggleMode.valueChanged.connect(self._updateHint)
         self._updateHint()
@@ -136,7 +158,7 @@ class SettingsWindow(FluentWidget):
             # can arrive late and override a size set while the window is hidden.
             self._placed = True
             area = QGuiApplication.primaryScreen().availableGeometry()
-            self.resize(640, min(880, area.height() - 48))
+            self.resize(640, min(984, area.height() - 48))
             self.move(area.center() - self.rect().center())
         if self.isMinimized():
             self.showNormal()
@@ -157,6 +179,20 @@ class SettingsWindow(FluentWidget):
         else:
             text = f"Hold {trigger} and roll the wheel to scroll sideways. A quick click still works as usual."
         self.page.setHint(text)
+
+    def _checkForUpdates(self):
+        # Placeholder: will compare __version__ with the latest GitHub release.
+        self._comingSoon("Checking for updates isn't available yet.")
+
+    def _viewSource(self):
+        if REPO_URL:
+            QDesktopServices.openUrl(QUrl(REPO_URL))
+        else:  # placeholder until the repository URL is set in hscroll/__init__.py
+            self._comingSoon("The source code link will be added once the project is on GitHub.")
+
+    def _comingSoon(self, text: str):
+        InfoBar.info("Coming soon", text, orient=Qt.Orientation.Horizontal, isClosable=True,
+                     position=InfoBarPosition.TOP, duration=3000, parent=self)
 
     def _setAutostart(self, on: bool):
         try:
