@@ -1,5 +1,7 @@
 # Horizontal Scroll
 
+![Banner](.asset/banner.png)
+
 A small Windows tray app: hold **Mouse Back** or **Mouse Forward** and roll the wheel to scroll sideways.
 The settings window follows the Fluent Design System: Mica background, light/dark mode and your accent color.
 
