@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+
+# PyInstaller output (attach the exe to a GitHub Release instead)
+build/
+dist/
+# *.spec is deliberately NOT ignored: HorizontalScroll.spec is the hand-edited build config.
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+desktop.ini
