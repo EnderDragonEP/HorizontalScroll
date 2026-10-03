@@ -39,13 +39,14 @@ EXCLUDES = [
     "PyQt6.QtQuick", "PyQt6.QtQml", "PyQt6.QtPdf", "PyQt6.QtOpenGL", "PyQt6.QtOpenGLWidgets",
     # pywin32's MFC UI and COM code generator (pulled in via win32com, never used)
     "win32ui", "pywin", "win32com.client.makepy",
-    # OpenSSL: no network use; hashlib falls back to its built-in hashes
+    # Python's OpenSSL modules: networking goes through Qt; hashlib falls back to built-in hashes
     "ssl", "_ssl", "_hashlib",
 ]
 
 # Qt files a widgets-only English app never loads.
-DROP_FILES = {"opengl32sw.dll", "d3dcompiler_47.dll", "qt6pdf.dll"}
-DROP_PLUGIN_DIRS = {"tls", "networkinformation"}
+# The update check uses HTTPS through Windows' own TLS (qschannelbackend), so the OpenSSL backend can go.
+DROP_FILES = {"opengl32sw.dll", "d3dcompiler_47.dll", "qt6pdf.dll", "qopensslbackend.dll", "qcertonlybackend.dll"}
+DROP_PLUGIN_DIRS = {"networkinformation"}
 DROP_IMAGE_PLUGINS = {"qgif", "qjpeg", "qtiff", "qwebp", "qicns", "qtga", "qwbmp", "qpdf"}
 
 

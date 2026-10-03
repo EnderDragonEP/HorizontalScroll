@@ -3,11 +3,12 @@ from PyQt6.QtCore import Qt, QUrl, pyqtSignal
 from PyQt6.QtGui import QColor, QDesktopServices, QFont, QGuiApplication
 from PyQt6.QtWidgets import QVBoxLayout, QWidget
 from qfluentwidgets import (BodyLabel, ComboBoxSettingCard, ExpandLayout, FluentIcon as FIF, FluentWidget,
-                            HyperlinkLabel, InfoBar, InfoBarPosition, PrimaryPushSettingCard, RangeSettingCard,
-                            ScrollArea, SettingCardGroup, SwitchSettingCard, TitleLabel, setFont)
+                            HyperlinkLabel, InfoBar, InfoBarPosition, MessageBox, PrimaryPushSettingCard,
+                            RangeSettingCard, ScrollArea, SettingCardGroup, SwitchSettingCard, TitleLabel, setFont)
 
 from . import APP_NAME, REPO_URL, __author__, __version__, config, icons
 from .config import cfg
+from .updates import UpdateChecker, is_newer
 
 TRIGGER_TEXTS = {"either": "Back or Forward", "back": "Back", "forward": "Forward"}
 
@@ -48,7 +49,7 @@ class AboutCard(PrimaryPushSettingCard):
     def __init__(self, parent=None):
         super().__init__("Check for updates", icons.app_icon(), APP_NAME,
                          f"Version {__version__} · © 2026 {__author__} · GPL-3.0", parent)
-        self.sourceLink = HyperlinkLabel("View source", self)
+        self.sourceLink = HyperlinkLabel(QUrl(REPO_URL), "View source", self)
         setFont(self.sourceLink, 12)
         self.vBoxLayout.addSpacing(4)
         self.vBoxLayout.addWidget(self.sourceLink, 0, Qt.AlignmentFlag.AlignLeft)
@@ -146,8 +147,10 @@ class SettingsWindow(FluentWidget):
 
         self.page.startupCard.setChecked(config.is_autostart())
         self.page.startupCard.checkedChanged.connect(self._setAutostart)
+        self.updates = UpdateChecker(self)
+        self.updates.finished.connect(self._onUpdateChecked)
+        self.updates.failed.connect(self._onUpdateFailed)
         self.page.aboutCard.clicked.connect(self._checkForUpdates)
-        self.page.aboutCard.sourceLink.clicked.connect(self._viewSource)
         cfg.trigger.valueChanged.connect(self._updateHint)
         cfg.toggleMode.valueChanged.connect(self._updateHint)
         self._updateHint()
@@ -181,18 +184,32 @@ class SettingsWindow(FluentWidget):
         self.page.setHint(text)
 
     def _checkForUpdates(self):
-        # Placeholder: will compare __version__ with the latest GitHub release.
-        self._comingSoon("Checking for updates isn't available yet.")
+        self._setChecking(True)
+        self.updates.check()
 
-    def _viewSource(self):
-        if REPO_URL:
-            QDesktopServices.openUrl(QUrl(REPO_URL))
-        else:  # placeholder until the repository URL is set in hscroll/__init__.py
-            self._comingSoon("The source code link will be added once the project is on GitHub.")
+    def _setChecking(self, checking: bool):
+        button = self.page.aboutCard.button
+        button.setEnabled(not checking)
+        button.setText("Checking…" if checking else "Check for updates")
 
-    def _comingSoon(self, text: str):
-        InfoBar.info("Coming soon", text, orient=Qt.Orientation.Horizontal, isClosable=True,
-                     position=InfoBarPosition.TOP, duration=3000, parent=self)
+    def _onUpdateChecked(self, release):
+        self._setChecking(False)
+        if release is None or not is_newer(release.version):  # None: nothing published yet
+            InfoBar.success("You're up to date", f"Version {__version__} is the latest version.",
+                            orient=Qt.Orientation.Horizontal, isClosable=True,
+                            position=InfoBarPosition.TOP, duration=3000, parent=self)
+            return
+        box = MessageBox(f"Version {release.version} is available",
+                         f"You have version {__version__}. Open the download page on GitHub?", self)
+        box.yesButton.setText("Download")
+        box.cancelButton.setText("Later")
+        if box.exec():
+            QDesktopServices.openUrl(QUrl(release.url))
+
+    def _onUpdateFailed(self, message: str):
+        self._setChecking(False)
+        InfoBar.warning("Couldn't check for updates", message, orient=Qt.Orientation.Horizontal,
+                        isClosable=True, position=InfoBarPosition.TOP, duration=5000, parent=self)
 
     def _setAutostart(self, on: bool):
         try:

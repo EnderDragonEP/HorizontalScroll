@@ -6,7 +6,7 @@ APP_NAME = "Horizontal Scroll"
 APP_ID = "HorizontalScroll"
 __version__ = "1.0.0"
 __author__ = "Ender Yang"
-REPO_URL = ""  # placeholder: set to the GitHub repository URL to enable "View source"
+REPO_URL = "https://github.com/EnderDragonEP/HorizontalScroll"  # "View source" and the update check
 
 DATA_DIR = Path(os.environ.get("APPDATA", Path.home())) / APP_ID
 CONFIG_FILE = DATA_DIR / "config.json"
