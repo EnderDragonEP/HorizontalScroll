@@ -5,17 +5,17 @@
 A small Windows tray app: hold **Mouse Back** or **Mouse Forward** and roll the wheel to scroll sideways.
 The settings window follows the Fluent Design System: Mica background, light/dark mode and your accent color.
 
-## How it works
+## Features
 
-| You do | It does |
-| --- | --- |
-| Hold Back/Forward and roll the wheel | Scrolls horizontally. Wheel down scrolls right, the same as Shift+wheel. |
-| Click Back/Forward without scrolling | Normal Back/Forward. The click is replayed when you release the button. |
-| **Toggle mode** on, click Back/Forward | Locks horizontal scrolling on until you click again. A small pill at the bottom of the screen shows On/Off. |
-| Use a full-screen app (game, F11, video) | With **Disable in full-screen apps** on (the default), the buttons and wheel work normally. |
-
-More settings: which button triggers it (Back or Forward / Back / Forward), scroll speed (0.5×–3.0×), reverse direction, and start with Windows.
-Closing the window keeps the app running in the notification area. Right-click the tray icon to turn it off or exit.
+- 🖱️ **Hold to scroll sideways** – Hold Mouse Back or Forward and roll the wheel.
+- 👆 **Clicks still work** – A quick click without scrolling still goes back or forward as usual.
+- 🔒 **Toggle mode** – Click once to lock horizontal scrolling on, click again to turn it off.
+- 🎮 **Game friendly** – Turn off automatically in full-screen games, videos and F11 browsers.
+- 🎛️ **Make it yours** – Pick the trigger button, scroll speed (0.5×–3.0×) and scroll direction.
+- 🚀 **Start with Windows** – An optional toggle, so it's always ready.
+- 📌 **Lives in the tray** – Closing the window keeps it running. Right-click the tray icon to pause it or exit.
+- 🎨 **Feels like Native App** – Fluent Design with Mica, light/dark mode and your accent color, updated live.
+- 🔔 **Update check** – See if a new version is out, right from the About section.
 
 ## Run
 
