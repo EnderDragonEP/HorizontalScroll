@@ -17,13 +17,18 @@ def parse_version(text: str) -> tuple:
     return tuple(numbers + [0] * (3 - len(numbers)))
 
 
+def version_from_tag(tag: str) -> str:
+    """'v1.2.3', 'V1.2.3' or 'v.1.2.3' -> '1.2.3' (everything before the first digit is dropped)."""
+    return re.sub(r"^\D+", "", tag)
+
+
 def is_newer(latest: str, current: str = __version__) -> bool:
     return parse_version(latest) > parse_version(current)
 
 
 @dataclass(frozen=True)
 class Release:
-    version: str  # without the "v" prefix, e.g. "1.1.0"
+    version: str  # without any prefix, e.g. "1.1.0"
     url: str      # the release page on GitHub
 
 
@@ -55,6 +60,6 @@ class UpdateChecker(QObject):
             return
         try:
             data = json.loads(bytes(reply.readAll()))
-            self.finished.emit(Release(data["tag_name"].lstrip("vV"), data["html_url"]))
+            self.finished.emit(Release(version_from_tag(data["tag_name"]), data["html_url"]))
         except (ValueError, KeyError, TypeError, AttributeError):
             self.failed.emit("GitHub sent an unexpected response.")

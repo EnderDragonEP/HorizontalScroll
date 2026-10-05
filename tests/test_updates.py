@@ -1,6 +1,6 @@
 import unittest
 
-from hscroll.updates import is_newer, parse_version
+from hscroll.updates import is_newer, parse_version, version_from_tag
 
 
 class UpdateVersionTest(unittest.TestCase):
@@ -9,6 +9,12 @@ class UpdateVersionTest(unittest.TestCase):
         self.assertEqual(parse_version("1.2"), (1, 2, 0))
         self.assertEqual(parse_version("V2"), (2, 0, 0))
         self.assertEqual(parse_version("1.4.0-beta.2"), (1, 4, 0))
+
+    def test_version_from_tag(self):
+        self.assertEqual(version_from_tag("v1.2.3"), "1.2.3")
+        self.assertEqual(version_from_tag("V1.2.3"), "1.2.3")
+        self.assertEqual(version_from_tag("v.1.0.1"), "1.0.1")
+        self.assertEqual(version_from_tag("1.0.0"), "1.0.0")
 
     def test_is_newer(self):
         self.assertTrue(is_newer("1.0.1", "1.0.0"))
