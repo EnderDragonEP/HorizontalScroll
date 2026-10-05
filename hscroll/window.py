@@ -8,10 +8,8 @@ from qfluentwidgets import (BodyLabel, ComboBoxSettingCard, ExpandLayout, Fluent
                             setCustomStyleSheet, setFont)
 
 from . import APP_NAME, REPO_URL, __version__, config, icons
-from .config import cfg
+from .config import TRIGGER_TEXTS, cfg
 from .updates import UpdateChecker, is_newer
-
-TRIGGER_TEXTS = {"either": "Back or Forward", "back": "Back", "forward": "Forward"}
 
 
 class Group(SettingCardGroup):
@@ -157,7 +155,7 @@ class SettingsWindow(FluentWidget):
         self.updates = UpdateChecker(self)
         self.updates.finished.connect(self._onUpdateChecked)
         self.updates.failed.connect(self._onUpdateFailed)
-        self.page.aboutCard.clicked.connect(self._checkForUpdates)
+        self.page.aboutCard.clicked.connect(self.checkForUpdates)
         cfg.trigger.valueChanged.connect(self._updateHint)
         cfg.toggleMode.valueChanged.connect(self._updateHint)
         self._updateHint()
@@ -190,7 +188,9 @@ class SettingsWindow(FluentWidget):
             text = f"Hold {trigger} and roll the wheel to scroll sideways. A quick click still works as usual."
         self.page.setHint(text)
 
-    def _checkForUpdates(self):
+    def checkForUpdates(self):
+        if not self.page.aboutCard.button.isEnabled():
+            return  # a check is already running
         self._setChecking(True)
         self.updates.check()
 

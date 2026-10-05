@@ -15,6 +15,7 @@ TRIGGERS = {
     "back": frozenset({BACK}),
     "forward": frozenset({FORWARD}),
 }
+TRIGGER_TEXTS = {"either": "Back or Forward", "back": "Back", "forward": "Forward"}
 
 
 class Config(QConfig):

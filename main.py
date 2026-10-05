@@ -105,6 +105,7 @@ class App(QObject):
         self.server.newConnection.connect(self._onConnection)
         self.window.hiddenToTray.connect(self._onHiddenToTray)
         self.tray.settingsRequested.connect(self.window.present)
+        self.tray.updateCheckRequested.connect(self._checkForUpdates)
         self.tray.exitRequested.connect(qapp.quit)
         self.hook.latchedChanged.connect(self._onLatched)
         self.hook.failed.connect(self._onHookFailed)
@@ -126,6 +127,10 @@ class App(QObject):
             self.hook.start(config.to_settings())  # updates the settings if already running
         else:
             self.hook.stop()
+
+    def _checkForUpdates(self):
+        self.window.present()  # the result is shown in the window
+        self.window.checkForUpdates()
 
     def _onAccentChanged(self):
         sync_accent()
