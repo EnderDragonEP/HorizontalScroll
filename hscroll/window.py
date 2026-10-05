@@ -1,12 +1,13 @@
 """Settings window, built with PyQt6-Fluent-Widgets (Fluent Design, Mica on Windows 11)."""
 from PyQt6.QtCore import Qt, QUrl, pyqtSignal
 from PyQt6.QtGui import QColor, QDesktopServices, QFont, QGuiApplication
-from PyQt6.QtWidgets import QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import (BodyLabel, ComboBoxSettingCard, ExpandLayout, FluentIcon as FIF, FluentWidget,
                             HyperlinkLabel, InfoBar, InfoBarPosition, MessageBox, PrimaryPushSettingCard,
-                            RangeSettingCard, ScrollArea, SettingCardGroup, SwitchSettingCard, TitleLabel, setFont)
+                            RangeSettingCard, ScrollArea, SettingCardGroup, SwitchSettingCard, TitleLabel,
+                            setCustomStyleSheet, setFont)
 
-from . import APP_NAME, REPO_URL, __author__, __version__, config, icons
+from . import APP_NAME, REPO_URL, __version__, config, icons
 from .config import cfg
 from .updates import UpdateChecker, is_newer
 
@@ -44,16 +45,22 @@ class SpeedCard(RangeSettingCard):
 
 
 class AboutCard(PrimaryPushSettingCard):
-    """App name, version and copyright with a "View source" link, plus the update button."""
+    """App name, then the version with a "View source" link, plus the update button."""
 
     def __init__(self, parent=None):
-        super().__init__("Check for updates", icons.app_icon(), APP_NAME,
-                         f"Version {__version__} · © 2026 {__author__} · GPL-3.0", parent)
+        super().__init__("Check for updates", icons.app_icon(), APP_NAME, f"Version {__version__}  ·", parent)
         self.sourceLink = HyperlinkLabel(QUrl(REPO_URL), "View source", self)
-        setFont(self.sourceLink, 12)
-        self.vBoxLayout.addSpacing(4)
-        self.vBoxLayout.addWidget(self.sourceLink, 0, Qt.AlignmentFlag.AlignLeft)
-        self.setFixedHeight(92)
+        # Match the description text; the card's QPushButton rule would make the link 14 px.
+        link_size = "HyperlinkLabel { font-size: 11px; }"
+        setCustomStyleSheet(self.sourceLink, link_size, link_size)
+        # Put the link on the version line, next to the card's description.
+        row = QHBoxLayout()
+        row.setSpacing(6)
+        self.vBoxLayout.removeWidget(self.contentLabel)
+        row.addWidget(self.contentLabel, 0, Qt.AlignmentFlag.AlignVCenter)
+        row.addWidget(self.sourceLink, 0, Qt.AlignmentFlag.AlignVCenter)
+        row.addStretch(1)
+        self.vBoxLayout.addLayout(row)
 
 
 class SettingsPage(ScrollArea):
@@ -161,7 +168,7 @@ class SettingsWindow(FluentWidget):
             # can arrive late and override a size set while the window is hidden.
             self._placed = True
             area = QGuiApplication.primaryScreen().availableGeometry()
-            self.resize(640, min(984, area.height() - 48))
+            self.resize(640, min(962, area.height() - 48))
             self.move(area.center() - self.rect().center())
         if self.isMinimized():
             self.showNormal()
